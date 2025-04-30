@@ -35,6 +35,9 @@
             color: black;
             text-align: left;
         }
+        th{
+             font-size: 10px;
+        }
         td {
             padding: 10px;
             vertical-align: top;
@@ -121,7 +124,7 @@
         <th style="text-align: left;">Amount Paid</th>
 <td> 
     NLe 
-    {{ number_format($payment->amount, fmod($payment->amount, 1) ? 2 : 0, '.', ',') }}
+    {{ number_format($payment->amount, fmod($payment->payment_amount_1, 1) ? 2 : 0, '.', ',') }}
 </td>
 
     </tr>
@@ -146,14 +149,20 @@
         <td>{{ \Carbon\Carbon::parse($payment->created_at)->format('Y-m-d') }}</td>
     </tr>
     <tr>
-        <th style="text-align: left;">Status</th>
+        <th style="text-align: left;">Payment Status</th>
         <td>{{ ucfirst($payment->status) }}</td>
+    </tr>
+     <tr>
+        <th style="text-align: left;">Payment Type</th>
+        <td>{{ ucfirst($payment->payment_type) }}</td>
     </tr>
     <tr>
         <th style="text-align: left;">Payment Proof</th>
         <td>
             @if(!empty($payment->payment_slip))
-                <img src="{{ asset('uploads/payment_slips/' . $payment->payment_slip) }}" alt="Payment Slip" style="width: 300px;">
+               {{--  <img src="{{ storage_path('app/public/' . $payment->payment_slip) }}" alt="Payment Slip" style="width: 100px;"> --}}
+                <br>
+              Payment Slip Url: {{url('/')}}/storage/{{$payment->payment_slip}}
             @else
                 No payment slip uploaded.
             @endif

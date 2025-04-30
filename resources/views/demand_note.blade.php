@@ -449,13 +449,10 @@
                 imprisonment.
             </p>
         </div>
-        {{-- <div style="display: flex; flex-direction: column; align-items: flex-end; text-align: right;">
-            <img src="{{ storage_path('app/public/Stamp.png') }}" class="logo" style="width: 80px; display: block;">
-            <img src="{{ storage_path('app/public/Sign.png') }}" class="logo" style="width: 60px; margin-top: -20px;">
-        </div>
-        --}}
-        <div class="gallery">
-            <div class="image-card">
+        
+
+        <div class="gallery" style="display: flex; gap: 10px; justify-content: center; align-items: flex-start;">
+            <div >
                 <div class="title">Front View</div>
                 @if($booking->space->image_1)
                 <img src="{{ storage_path('app/public/' . $booking->space->image_1) }}" alt="Front view">
@@ -463,7 +460,7 @@
                 no image
                 @endif
             </div>
-            <div class="image-card">
+            <div >
                 <div class="title">Back View</div>
                 @if($booking->space->image_2)
                 <img src="{{ storage_path('app/public/' . $booking->space->image_2) }}" alt="Back view">
@@ -471,7 +468,7 @@
                 no image
                 @endif
             </div>
-            <div class="image-card">
+            <div >
                 <div class="title">Whole View</div>
                 @if($booking->space->image_3)
                 <img src="{{ storage_path('app/public/' . $booking->space->image_3) }}" alt="Whole view">

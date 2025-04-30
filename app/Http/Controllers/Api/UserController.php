@@ -8,6 +8,7 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Role;
+use App\Models\RoleNew;
 use App\Models\User;
 use Illuminate\Http\Request;
 use DB;
@@ -50,15 +51,21 @@ class UserController extends Controller
          // Assign role if user_type is system and role_id is provided
          if ($request->input('user_type') === 'system' && $request->has('role_id')) {
             $roleId = $request->input('role_id');
-            $role = Role::find($roleId);
+            // $role = Role::find($roleId);
+             $role = RoleNew::find($roleId);
 
             if ($role) {
-                DB::table('user_roles')->insert([
-                    'user_id' => $user->id,
-                    'role_id' => $role->id,
-                ]);
+                // DB::table('user_roles')->insert([
+                //     'user_id' => $user->id,
+                //     'role_id' => $role->id,
+                // ]);
+
+                $userUpdate=User::where('id',$user->id)->update(['role_id'=>$request->input('role_id')]);
+
             }
         }
+
+        audit_log('add', 'user', $user->id, request()->all());
 
 
         return response(new UserResource($user), 201);
@@ -83,15 +90,40 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function update(UpdateUserRequest $request, User $user)
-    {
-        $data = $request->validated();
-        if (isset($data['password'])) {
-            $data['password'] = bcrypt($data['password']);
-        }
-        $user->update($data);
+{
+    $data = $request->validated();
 
-        return new UserResource($user);
+    if (isset($data['password'])) {
+        $data['password'] = bcrypt($data['password']);
     }
+
+    $user->update($data);
+
+    // Update roles if user_type is system and role_id is provided
+    if ($request->input('user_type') === 'system' && $request->has('role_id')) {
+        $roleId = $request->input('role_id');
+        // $role = Role::find($roleId);
+         $role = RoleNew::find($roleId);
+
+        if ($role) {
+            // Detach old roles (if any) and attach the new one
+            // DB::table('user_roles')->where('user_id', $user->id)->delete();
+
+            // DB::table('user_roles')->insert([
+            //     'user_id' => $user->id,
+            //     'role_id' => $role->id,
+            // ]);
+
+            $userUpdate=User::where('id',$user->id)->update(['role_id'=>$request->input('role_id')]);
+
+        }
+    }
+
+     audit_log('edit', 'user', $user->id, request()->all());
+
+    return new UserResource($user->fresh('roles.permissions')); // ensure roles & permissions are reloaded
+}
+
 
     /**
      * Remove the specified resource from storage.
@@ -101,8 +133,17 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
+         $userId = $user->id; // Capture before delete
+
         $user->delete();
 
-        return response("", 204);
+        // After deletion, log the audit
+        audit_log('delete', 'user', $userId, [
+            'deleted_user_id' => $userId,
+            'deleted_user_name' => $user->name ?? null, // If you have 'name' column
+            'deleted_user_email' => $user->email ?? null, // If you have 'email' column
+        ]);
+
+    return response("", 204);
     }
 }

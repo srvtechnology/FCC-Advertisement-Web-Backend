@@ -43,29 +43,33 @@ class AuthController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
         $token = $user->createToken('main')->plainTextToken;
-         
+
         // return response(compact('user', 'token'));
         // ALTER TABLE `users` ADD `otp` VARCHAR(255) NULL AFTER `updated_at`;
 
-         // Generate OTP
-         $otp = rand(100000, 999999);
+        // Generate OTP
+        $otp = rand(100000, 999999);
 
         // Send OTP via email (directly from the controller)
-        Mail::raw("Your OTP code is: $otp", function ($message) use ($user) {
-            $message->to("jeetbasak54@gmail.com")
-                    ->subject('Your OTP Code');
-        });
-        Mail::raw("Your OTP code is: $otp", function ($message) use ($user) {
+        Mail::raw("Your one-time verification code is: $otp to login as system or admin user for FCC Advertisement Management System.", function ($message) use ($user) {
             $message->to($user->email)
-                    ->subject('Your OTP Code');
+                ->subject('Your OTP Code');
+        });
+        Mail::raw("Your one-time verification code is: $otp to login as system or admin user for FCC Advertisement Management System.", function ($message) use ($user) {
+            $message->to($user->email)
+                ->subject('Your OTP Code');
         });
 
         //update otp on user table
-        $updt=User::where('id',$user->id)->update(['otp'=>$otp]);
+        $updt = User::where('id', $user->id)->update([
+            'otp' => $otp,
+            // 'otp_expires_at' => now()->addMinutes(300),
+            'last_activity_at' => now(),
+        ]);
 
         return response([
-            'u'=>$updt,
-            'user'=>$user,
+            'u' => $updt,
+            'user' => $user,
             'message' => 'OTP has been sent to your email. Please verify.'
         ]);
     }
@@ -73,35 +77,35 @@ class AuthController extends Controller
 
 
 
-public function verifyOtp(Request $request)
-{
-    // Validate the request
-    $request->validate([
-        'email' => 'required|email',
-        'otp' => 'required|digits:6'
-    ]);
+    public function verifyOtp(Request $request)
+    {
+        // Validate the request
+        $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|digits:6'
+        ]);
 
-    // Find user with the given email and OTP
-    $user = User::where('email', $request->email)
-                ->where('otp', $request->otp)
-                ->first();
+        // Find user with the given email and OTP
+        $user = User::where('email', $request->email)
+            ->where('otp', $request->otp)
+            ->first();
 
-    // Check if user exists
-    if (!$user) {
-        return response(['message' => 'Invalid or expired OTP'], 422);
+        // Check if user exists
+        if (!$user) {
+            return response(['message' => 'Invalid or expired OTP'], 422);
+        }
+
+        // Clear OTP after successful verification
+        $updt = User::where('id', $user->id)->update(['otp' => null]);
+
+        // Log in the user manually
+        Auth::login($user);
+
+        // Generate API token
+        $token = $user->createToken('main')->plainTextToken;
+
+        return response(compact('user', 'token'));
     }
-
-    // Clear OTP after successful verification
-    $updt=User::where('id',$user->id)->update(['otp'=>null]);
-
-    // Log in the user manually
-    Auth::login($user);
-
-    // Generate API token
-    $token = $user->createToken('main')->plainTextToken;
-
-    return response(compact('user', 'token'));
-}
 
 
 
@@ -128,7 +132,7 @@ public function verifyOtp(Request $request)
 
     public function allRolesWithPermissions()
     {
-        $roles = Role::with('permissions')->get();
+        $roles = Role::with('permissions')->orderBy('id','desc')->get();
 
         return response()->json(['roles' => $roles]);
     }
@@ -151,34 +155,79 @@ public function verifyOtp(Request $request)
         return response()->json(['message' => 'Role assigned successfully']);
     }
 
-    public function assignPermissionsToRole(Request $request)
-    {
-        $validatedData = $request->validate([
-            'role_id' => 'required|exists:roles,id',
-            'permission_ids' => 'required|array',
-            'permission_ids.*' => 'exists:permissions,id',
-        ]);
+    // public function assignPermissionsToRole(Request $request)
+    // {
+    //     $validatedData = $request->validate([
+    //         'role_id' => 'required|exists:roles,id',
+    //         'permission_ids' => 'required|array',
+    //         'permission_ids.*' => 'exists:permissions,id',
+    //     ]);
 
-        $role = Role::find($validatedData['role_id']);
+    //     $role = Role::find($validatedData['role_id']);
 
-        foreach ($validatedData['permission_ids'] as $permissionId) {
-            // Check if the record already exists
+    //     foreach ($validatedData['permission_ids'] as $permissionId) {
+    //         // Check if the record already exists
+    //         $existingRecord = DB::table('role_permissions')
+    //             ->where('role_id', $role->id)
+    //             ->where('permission_id', $permissionId)
+    //             ->first();
+
+    //         if (!$existingRecord) {
+    //             // Insert only if the record doesn't exist
+    //             DB::table('role_permissions')->insert([
+    //                 'role_id' => $role->id,
+    //                 'permission_id' => $permissionId,
+    //             ]);
+    //         }
+    //     }
+
+    //     return response()->json(['message' => 'Permissions assigned to role successfully']);
+    // }
+
+public function assignPermissionsToRole(Request $request)
+{
+    $validatedData = $request->validate([
+        'role_id' => 'required|exists:roles,id',
+        'permission_ids' => 'required|array',
+        'permission_ids.*' => 'exists:permissions,id',
+        'is_edit' => 'boolean' // Flag to indicate if this is an edit operation
+    ]);
+
+    $role = Role::find($validatedData['role_id']);
+
+    if ($request->has('is_edit') && $request->is_edit) {
+        // Edit operation - first remove all existing permissions
+        DB::table('role_permissions')->where('role_id', $role->id)->delete();
+    }
+
+    foreach ($validatedData['permission_ids'] as $permissionId) {
+        // Check if the record already exists (only for add operation)
+        if (!($request->has('is_edit') && $request->is_edit)) {
             $existingRecord = DB::table('role_permissions')
                 ->where('role_id', $role->id)
                 ->where('permission_id', $permissionId)
                 ->first();
 
-            if (!$existingRecord) {
-                // Insert only if the record doesn't exist
-                DB::table('role_permissions')->insert([
-                    'role_id' => $role->id,
-                    'permission_id' => $permissionId,
-                ]);
+            if ($existingRecord) {
+                continue; // Skip if already exists (for add operation)
             }
         }
 
-        return response()->json(['message' => 'Permissions assigned to role successfully']);
+        // Insert the new permission
+        DB::table('role_permissions')->insert([
+            'role_id' => $role->id,
+            'permission_id' => $permissionId,
+            // 'created_at' => now(),
+            // 'updated_at' => now()
+        ]);
     }
+
+    return response()->json([
+        'message' => $request->has('is_edit') && $request->is_edit 
+            ? 'Role permissions updated successfully' 
+            : 'Permissions assigned to role successfully'
+    ]);
+}
 
     public function allPermissions()
     {

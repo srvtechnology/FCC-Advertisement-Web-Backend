@@ -55,8 +55,18 @@ class SpaceController extends Controller
 
 public function index(Request $request)
 {
-    $query = Space::with('bookings:space_id,status','createdByUser');
 
+    $createdUserId = auth()->id();
+
+    $adminRole = auth()->user()->roles->contains('name', 'admin');
+
+    if ($adminRole) {
+        $query = Space::with('bookings:space_id,status', 'createdByUser');
+    }else {
+        $query = Space::with('bookings:space_id,status', 'createdByUser')
+        ->where('created_user_id', $createdUserId);
+    }
+   
     if ($request->filled('search')) {
         $search = $request->input('search');
         $query->where(function ($q) use ($search) {

@@ -19,7 +19,7 @@ class BookingPdfController extends Controller
         $booking = Booking::with(['user', 'space','payment','payments'])->withSum('payments', 'payment_amount_1')->findOrFail($id);
         // Attach the payment amount field
         $booking->payment_amount = Payment::where('booking_id', $id)->value('amount') ?? 'N/A';
-
+        // return view('demand_note', compact('booking'));
         $pdf = Pdf::loadView('demand_note', compact('booking'));
         return $pdf->download("Demand_Note_{$booking->id}.pdf");
     }
