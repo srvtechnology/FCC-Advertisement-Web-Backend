@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
+use App\Models\AuditModel;
 
 class RoleController extends Controller
 {
@@ -39,6 +40,8 @@ class RoleController extends Controller
             ]);
 
             $role = RoleNew::create($validated);
+
+            audit_log('add', 'role', $role->id, request()->all());
 
             return response()->json([
                 'success' => true,
@@ -93,6 +96,11 @@ class RoleController extends Controller
                 $role->permissions()->sync($validated['permission_ids']);
             });
 
+
+            audit_log('add', 'role', $role->id, [
+            'permissions' => json_encode($request->all()),
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => 'Permissions updated successfully',
@@ -122,6 +130,10 @@ class RoleController extends Controller
                 $role->permissions()->detach();
                 $role->delete();
             });
+
+             audit_log('add', 'role', $role->id, [
+                'deleted_id' => $role->id,
+                ]);
 
             return response()->json([
                 'success' => true,
@@ -169,5 +181,80 @@ public function getUserPermissions(Request $request)
         ], 500);
     }
 }
+
+
+
+
+public function all_logs(Request $request)
+{
+    try {
+        $user = auth()->user(); // Assuming you're using auth
+
+        $query = AuditModel::query()->orderBy('id', 'desc')->with('userData');
+
+        // Apply filters if they exist in the request
+        if ($request->has('action') && $request->action != '') {
+            $query->where('action', $request->action);
+        }
+
+        if ($request->has('category') && $request->category != '') {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->has('user_id') && $request->user_id != '') {
+            $query->where('user_id', $request->user_id);
+        }
+
+        if ($request->has('entity_id') && $request->entity_id != '') {
+            $query->where('entity_id', $request->entity_id);
+        }
+
+        if ($request->has('date_from') && $request->date_from != '') {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->has('date_to') && $request->date_to != '') {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        if ($request->has('search') && $request->search != '') {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('description', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('ip_address', 'LIKE', "%{$searchTerm}%")
+                  ->orWhereHas('userData', function($userQuery) use ($searchTerm) {
+                      $userQuery->where('name', 'LIKE', "%{$searchTerm}%")
+                               ->orWhere('email', 'LIKE', "%{$searchTerm}%");
+                  });
+            });
+        }
+
+        // Get paginated results
+        $perPage = $request->per_page ?? 10;
+        $allLogs = $query->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data' => $allLogs
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Failed to fetch audit logs',
+            'error' => $e->getMessage()
+        ], 500);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
 
 }

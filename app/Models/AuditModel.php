@@ -9,5 +9,10 @@ class AuditModel extends Model
     use HasFactory;
     
     protected $table = 'audit_trails';
+
+      public function userData() {
+            return $this->hasOne('App\Models\User', 'id', 'user_id');
+        }
+
  
 }

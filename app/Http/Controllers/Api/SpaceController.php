@@ -123,6 +123,8 @@ public function index(Request $request)
         // Get the inserted ID
          $insertedId = $space->id;
 
+        audit_log('add', 'space', $space->id, request()->all());
+
 
         return response()->json([ 'id' => $insertedId,'message' => 'Space created successfully', 'data' => $space], Response::HTTP_CREATED);
     }
@@ -151,16 +153,33 @@ public function index(Request $request)
         }
 
         $space->update($data);
+        audit_log('edit', 'space', $space->id, request()->all());
 
         return response()->json(['message' => 'Space updated successfully', 'data' => $space], Response::HTTP_OK);
     }
 
     // Delete a space
+    // public function destroy(Space $space)
+    // {
+    //     $space->delete();
+    //     return response()->json(['message' => 'Space deleted successfully'], Response::HTTP_NO_CONTENT);
+    // }
+
     public function destroy(Space $space)
     {
+        $spaceId = $space->id;
+        $spaceData = $space->toArray(); // Optional: capture full space details
+
         $space->delete();
+
+        audit_log('delete', 'space', $spaceId, [
+            'deleted_space_id' => $spaceId,
+            'deleted_space_data' => $spaceData,
+        ]);
+
         return response()->json(['message' => 'Space deleted successfully'], Response::HTTP_NO_CONTENT);
     }
+
 
 
 
@@ -180,6 +199,12 @@ public function index(Request $request)
         $upd['image_3'] = $imagePath;
     }
     $u=Space::where('id',$request->id)->update($upd);
+
+      audit_log('edit', 'space', $request->id, [
+            'edited_space_id' => $request->id,
+            'form_data' => json_encode($request->all()),
+        ]);
+
 
          return response()->json(['message' => 'Space updated successfully', 'data' => $u], Response::HTTP_OK);
     }

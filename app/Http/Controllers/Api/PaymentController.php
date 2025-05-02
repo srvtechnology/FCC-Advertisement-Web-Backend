@@ -133,6 +133,8 @@ public function index(Request $request)
     // Update booking status to approved
     Booking::where('id', $request->booking_id)->update(['status' => 'approved']);
 
+    audit_log('add', 'payment', $payment->id, request()->all());
+
     return response()->json(['message' => 'Payment successful', ]);
 }
 

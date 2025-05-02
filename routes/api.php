@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\SpaceController;
 use App\Http\Controllers\Api\SpaceCategoryController;
 
+use App\Http\Controllers\CameraController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -121,7 +122,7 @@ Route::middleware(['auth:sanctum', /*'check.inactivity'*/])->group(function () {
 
 Route::post('/signup', [AuthController::class, 'signup']);
 Route::post('/login', [AuthController::class, 'login']);
- Route::post('/spacesUpadte', [SpaceController::class, 'spacesUpadte']);
+ Route::middleware('auth:sanctum')->post('/spacesUpadte', [SpaceController::class, 'spacesUpadte']);
  Route::get('/counts', [SpaceController::class, 'counts']);
  Route::post('/bulk-download-pdf', [BookingPdfController::class, 'downloadBulkPDF']);
  Route::post('/verify-otp', [AuthController::class, 'verifyOtp']);
@@ -138,10 +139,15 @@ Route::post('/roles-new/{id}/permissions', [RoleController::class, 'updatePermis
 Route::delete('/roles-new/{id}', [RoleController::class, 'delete']);
 
 Route::get('/permissions-new', [PermissionController::class, 'index']);
+
+Route::get('/all-logs', [RoleController::class, 'all_logs']);
+
 });
 
 Route::middleware('auth:sanctum')->get('/user-permissions', [RoleController::class, 'getUserPermissions']);
 
+Route::get('/camera-tool', [CameraController::class, 'index']);
+Route::post('/analyze-image', [CameraController::class, 'analyze']);
 
 
 

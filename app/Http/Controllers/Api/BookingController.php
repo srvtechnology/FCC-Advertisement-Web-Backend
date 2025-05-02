@@ -100,6 +100,8 @@ class BookingController extends Controller
         'description_of_ad' => $request->description_of_ad
     ]);
 
+     audit_log('add', 'booking', $booking->id, request()->all());
+
     return response()->json(['message' => 'Booking successful', 'booking' => $booking], 201);
 }
 
@@ -113,6 +115,8 @@ class BookingController extends Controller
 
         $booking->update(['status' => $request->status]);
 
+         audit_log('edit', 'booking', $booking->id, request()->all());
+
         return response()->json(['message' => 'Booking status updated successfully', 'booking' => $booking]);
     }
 
@@ -122,6 +126,10 @@ class BookingController extends Controller
         if ($booking->user_id !== Auth::id()) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
+
+         audit_log('delete', 'booking', $booking->id,  [
+            'deleted_booking_id' => $booking->id,
+        ]);
 
         $booking->delete();
         return response()->json(['message' => 'Booking cancelled successfully']);
