@@ -58,7 +58,8 @@ public function index(Request $request)
 
     $createdUserId = auth()->id();
 
-    $adminRole = auth()->user()->roles->contains('name', 'admin');
+    $adminRole = auth()->user()->role_id = 2;
+
 
     if ($adminRole) {
         $query = Space::with('bookings:space_id,status', 'createdByUser');
