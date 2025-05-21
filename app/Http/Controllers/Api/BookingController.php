@@ -134,4 +134,67 @@ class BookingController extends Controller
         $booking->delete();
         return response()->json(['message' => 'Booking cancelled successfully']);
     }
+
+
+
+
+
+   public function all_amount(Request $request)
+{
+    $query = Booking::with('user','createdByUser', 'space.category','payment','payments')
+        ->orderBy('id', 'desc')
+        ->withSum('payments', 'payment_amount_1');
+
+    if ($request->filled('agent_name')) {
+        $query->whereHas('space', function ($q) use ($request) {
+            $q->where('name_of_advertise_agent_company_or_person', 'LIKE', '%' . $request->agent_name . '%');
+        });
+    }
+
+    // Set start and end date based on filter_type
+    if ($request->filled('filter_type')) {
+        $now = Carbon::now();
+
+        switch ($request->filter_type) {
+            case 'daily':
+                $startDate = $now->copy()->startOfDay();
+                $endDate = $now->copy()->endOfDay();
+                break;
+
+            case 'monthly':
+                $startDate = $now->copy()->startOfMonth();
+                $endDate = $now->copy()->endOfMonth();
+                break;
+
+            case '6month':
+                $startDate = $now->copy()->subMonths(5)->startOfMonth(); // Last 6 months including current
+                $endDate = $now->copy()->endOfMonth();
+                break;
+
+            case 'yearly':
+                $startDate = $now->copy()->startOfYear();
+                $endDate = $now->copy()->endOfYear();
+                break;
+
+            default:
+                $startDate = null;
+                $endDate = null;
+        }
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('created_at', [$startDate, $endDate]);
+        }
+    }
+
+  
+
+    return response()->json($query->get());
+}
+
+
+
+
+
+
+
 }

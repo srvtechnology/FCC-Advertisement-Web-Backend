@@ -149,5 +149,24 @@ Route::middleware('auth:sanctum')->get('/user-permissions', [RoleController::cla
 Route::get('/camera-tool', [CameraController::class, 'index']);
 Route::post('/analyze-image', [CameraController::class, 'analyze']);
 
+// routes/web.php or routes/api.php (preferably)
+Route::post('/store-cache', function (Illuminate\Http\Request $request) {
+    Cache::put('analyzed_data', $request->input('data'), now()->addMinutes(10));
+    return response()->json(['status' => 'success']);
+});
+Route::get('/get-cache', function () {
+    $data = Cache::get('analyzed_data');
+    return response()->json(['data' => $data]);
+});
+
+Route::get('/test-log', function () {
+    Log::info('Test log entry from web.php route');
+    file_put_contents(storage_path('logs/custom_log.txt'), 'Manual route reached'.PHP_EOL, FILE_APPEND);
+    return 'Check logs';
+});
+
+
+Route::post('/all-amount-data', [BookingController::class, 'all_amount']);
+
 
 
