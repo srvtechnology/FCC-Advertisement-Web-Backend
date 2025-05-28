@@ -58,7 +58,7 @@ public function index(Request $request)
 
     $createdUserId = auth()->id();
 
-    $adminRole = auth()->user()->role_id = 2;
+    $adminRole = auth()->user()->role_id == 2;
 
 
     if ($adminRole) {
