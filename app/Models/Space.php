@@ -45,6 +45,7 @@ class Space extends Model
         'business_contact',
         'business_name',
         'created_user_id',
+        'agent_rate_name'
     ];
 
     public function category()

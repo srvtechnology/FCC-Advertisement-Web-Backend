@@ -9,5 +9,5 @@ class SpaceCategory extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'rate'];
+    protected $fillable = ['name', 'rate','system_agent_rate','corporate_agent_rate'];
 }

@@ -117,8 +117,27 @@ public function index(Request $request)
         if (!$category) {
             return response()->json(['message' => 'Invalid Space Category'], Response::HTTP_BAD_REQUEST);
         }
+        $rate_choosen = $request->agent_rate_name;
+        switch ($rate_choosen) {
+            case 'general_agent_rate':
+                # code...
+                $rate = $category->rate;
+                break;
+            case 'system_agent_rate':
+                # code...
+                $rate = $category->system_agent_rate;
+                break;
+            case 'corporate_agent_rate':
+                # code...
+                $rate = $category->corporate_agent_rate;
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+        $data['rate'] = $rate; // Assign rate
 
-        $data['rate'] = $category->rate; // Assign rate
 
         $space = Space::create($data);
         // Get the inserted ID

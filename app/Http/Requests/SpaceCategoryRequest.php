@@ -26,6 +26,8 @@ class SpaceCategoryRequest extends FormRequest
         return [
             'name' => 'required|string|max:255',
             'rate' => 'required|numeric|min:0',
+            'system_agent_rate' => 'required|numeric|min:0',
+            'corporate_agent_rate' => 'required|numeric|min:0',
         ];
     }
 }

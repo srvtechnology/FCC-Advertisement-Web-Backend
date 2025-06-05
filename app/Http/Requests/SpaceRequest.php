@@ -48,6 +48,7 @@ class SpaceRequest extends FormRequest
             'business_address'=> 'nullable',
             'business_contact'=> 'nullable',
             'business_name'=> 'nullable',
+            'agent_rate_name'=> 'required',
         ];
     }
 }
