@@ -58,7 +58,7 @@ public function index(Request $request)
 
     $createdUserId = auth()->id();
 
-    $adminRole = auth()->user()->role_id = 2;
+    $adminRole = auth()->user()->role_id == 2;
 
 
     if ($adminRole) {
@@ -68,12 +68,30 @@ public function index(Request $request)
         ->where('created_user_id', $createdUserId);
     }
    
+    // if ($request->filled('search')) {
+    //     $search = $request->input('search');
+    //     $query->where(function ($q) use ($search) {
+    //         $q->where('name_of_person_collection_data', 'LIKE', "%{$search}%");
+    //     });
+    // }
+
     if ($request->filled('search')) {
         $search = $request->input('search');
-        $query->where(function ($q) use ($search) {
+ 
+        // Extract number from end of search string if present (e.g., FCC/SPC/1849)
+        preg_match('/\d+$/', $search, $matches);
+        $extractedId = $matches[0] ?? null;
+
+        $query->where(function ($q) use ($search, $extractedId) {
             $q->where('name_of_person_collection_data', 'LIKE', "%{$search}%");
+
+            // Also search by ID if numeric part is found
+            if ($extractedId) {
+                $q->orWhere('id', $extractedId);
+            }
         });
     }
+
 
     // Ensure date filtering is working
     if ($request->filled('from_date') && $request->has('to_date')) {
@@ -117,8 +135,27 @@ public function index(Request $request)
         if (!$category) {
             return response()->json(['message' => 'Invalid Space Category'], Response::HTTP_BAD_REQUEST);
         }
+        $rate_choosen = $request->agent_rate_name;
+        switch ($rate_choosen) {
+            case 'general_agent_rate':
+                # code...
+                $rate = $category->rate;
+                break;
+            case 'system_agent_rate':
+                # code...
+                $rate = $category->system_agent_rate;
+                break;
+            case 'corporate_agent_rate':
+                # code...
+                $rate = $category->corporate_agent_rate;
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+        $data['rate'] = $rate; // Assign rate
 
-        $data['rate'] = $category->rate; // Assign rate
 
         $space = Space::create($data);
         // Get the inserted ID
