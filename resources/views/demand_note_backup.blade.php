@@ -9,57 +9,36 @@
         font-family: Arial, sans-serif;
         text-align: center;
         margin: 20px;
-        position: relative;
         /*background: url('{{storage_path('app/public/image4.png')}}') no-repeat center center;*/
         background-size: cover;
         /*  opacity: 0.1;
         z-index: -1;*/
         }
 
-        /* Watermark for all pages */
-        body::before {
-            content: '';
-            display: block;
-            width: 100%;
-            background: url('{{storage_path('app/public/image4.png')}}') no-repeat center center;
-            background-size: 50%;
-            background-repeat: no-repeat;
-            background-position: center;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100%;
-            height: 100%;
-            opacity: 0.15;
-            pointer-events: none;
-            z-index: 9999;
-        }
-
-        /* Ensure content stays above watermark */
-        .container, .table-responsive, .gallery, hr, h4, .header, table {
-            position: relative;
-            z-index: 10000;
-        }
-
-        /* Date display styling */
-        .generation-date {
-            text-align: right;
-            font-size: 12px;
-            font-weight: bold;
-            color: #1e398d;
-            margin-top: -10px;
-            margin-bottom: 10px;
-            position: relative;
-            z-index: 10000;
-        }
+        .watermark {
+    /* position: relative; */
+}
+.watermark:before{
+content: '';
+display: block;
+width: 100%;
+background: url('{{storage_path('app/public/image4.png')}}') no-repeat center center;
+background-size: 50%;
+background-repeat: no-repeat;
+background-position: center;
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 100%;
+height: 100%;
+opacity: .15;
+}
 
         .container {
         width: 80%;
         margin: auto;
         color: #1e398d;
-        position: relative;
-        z-index: 10000;
         }
         .header {
         font-size: 24px; /* Reduced header font size */
@@ -122,8 +101,6 @@
         border-collapse: collapse;
         table-layout: auto;
         word-wrap: break-word;
-        position: relative;
-        z-index: 10000;
         }
         th, td {
         border: 1px solid black;
@@ -134,128 +111,52 @@
         }
         .table-responsive {
         overflow-x: auto;
-        position: relative;
-        z-index: 10000;
         }
         img {
         display: block;
         }
-        
-        /* Improved Gallery Styles - Compact */
-        .gallery-section {
-            margin-top: 20px;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 10000;
+        .gallery {
+        display: flex;
+        justify-content: space-between;
+        gap: 20px;
+        max-width: 800px;
+        margin: auto;
         }
-        
-        .gallery-title {
-            text-align: left;
-            font-size: 13px;
-            font-weight: 900;
-            color: #1e398d;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .image-card {
+        text-align: center;
+        width: 200px;
         }
-        
-        .gallery-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 30px;
-            margin-bottom: 15px;
-            position: relative;
-            z-index: 10000;
+        .image-card img {
+        width: 200px;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
         }
-        
-        .gallery-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 160px;
-        }
-        
-        .gallery-item .title {
-            margin-top: 0;
-            margin-bottom: 5px;
-            font-size: 12px;
-            font-weight: 900;
-            color: #1e398d;
-            text-transform: uppercase;
-        }
-        
-        .gallery-item img {
-            width: 150px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 5px;
-            border: 1px solid #1e398d;
-        }
-        
-        .gallery-item .no-image {
-            width: 150px;
-            height: 100px;
-            background-color: #f5f5f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 5px;
-            border: 1px dashed #1e398d;
-            color: #666;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .gallery-single {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            z-index: 10000;
-        }
-
-        /* Print styles to ensure watermark on every page */
-        @media print {
-            body::before {
-                position: fixed;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .table-responsive {
-                break-inside: avoid;
-            }
-            .gallery-section {
-                break-inside: avoid;
-                page-break-inside: avoid;
-            }
+        .title {
+        margin-top: 10px;
+        font-size: 16px;
+        font-weight: bold;
         }
         </style>
         
     </head>
     <body>
         <div class="container">
+           <div class="watermark"></div>
             <div class="header" style="font-weight:900; font-size:30px ;">FREETOWN CITY COUNCIL</div>
             <div>
                 <img src="{{storage_path('app/public/image4.png')}}" class="logo">
                 
             </div>
-            <span><span class="bold" style="text-align:center; font-size: 12px;">New City Council Complex
+            <span><span class="bold" style="text-align:center;font-size: 12px;">New City Council Complex
                 17 Wallace-Johnson Street
                 Freetown
             Sierra Leone</span>
             <br>
-            Tel:<span class="bold" style="text-align:center; font-size: 12px;"> +232 76 345 504</span><br>
+            Tel:<span class="bold" style="text-align:center;font-size: 12px;"> +232 76 345 504</span><br>
         </div>
         <hr>
         <div class="header">Demand Note</div>
-        <br>
-        
-        <!-- Generation Date - Top Right above first table -->
-        <div class="generation-date">
-            Demand Note Generated: {{ \Carbon\Carbon::now()->format('d-m-Y h:i A') }}
-        </div>
-        
         <div class="table-responsive">
             <h4  style="text-align:left; font-size: 12px; margin-bottom: 5px;">Customer Details</h4>
             <table>
@@ -495,7 +396,7 @@
         <br>
         <br>
         <div class="table-responsive">
-    <h4 style="text-align:left; font-size: 12px; margin-bottom: 5px;">Payment Transactions</h4>
+    <h4 style="text-align:left; font-size: 12px; margin-bottom: 5px;">Amount Details</h4>
     <table class="table">
         <thead>
             <tr>
@@ -551,16 +452,16 @@
             </p>
             
             <p style="text-align: justify; line-height: 1.8; margin-bottom: 15px;font-size: 11px;">
-                <strong>Section 3 (j)</strong> of the Municipality byelaws states that "any display of banners or erection of
-                billboards or other advertising hoardings without first obtaining appropriate permits from Council"
+                <strong>Section 3 (j)</strong> of the Municipality byelaws states that “any display of banners or erection of
+                billboards or other advertising hoardings without first obtaining appropriate permits from Council”
                 is an offence.
             </p>
             
             <p style="text-align: justify; line-height: 1.8; margin-bottom: 15px;font-size: 11px;">
-                <strong>Section 4 (2)</strong> states that "any banner, billboard or advertising hoarding erected in
+                <strong>Section 4 (2)</strong> states that “any banner, billboard or advertising hoarding erected in
                 contravention of paragraph (j) of sub clause (3), shall be pulled down or confiscated by Council
                 and cost for such action and a fine of Le100,000 per billboard and Le25,000 per banner levied on
-                the defaulter".
+                the defaulter”.
             </p>
             
             <p style="text-align: justify; line-height: 1.8;font-size:11px">
@@ -571,43 +472,36 @@
             </p>
         </div>
         
-        <!-- Compact Gallery Section - First row: 2 images, Second row: 1 image centered -->
-        <div class="gallery-section">
-            <h4 class="gallery-title"> Advertisement Space Images</h4>
-            
-            <!-- First Row - Front View and Back View -->
-            <div class="gallery-row">
-                <div class="gallery-item">
-                    <div class="title">Front View</div>
-                    @if($booking->space->image_1)
-                        <img src="{{ storage_path('app/public/' . $booking->space->image_1) }}" alt="Front view">
-                    @else
-                        <div class="no-image">No image</div>
-                    @endif
-                </div>
-                
-                <div class="gallery-item">
-                    <div class="title">Back View</div>
-                    @if($booking->space->image_2)
-                        <img src="{{ storage_path('app/public/' . $booking->space->image_2) }}" alt="Back view">
-                    @else
-                        <div class="no-image">No image</div>
-                    @endif
-                </div>
+
+        <div class="gallery" style="display: flex; gap: 30px; justify-content: center; align-items: flex-start;">
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="title" style="margin-bottom: 5px;">Front View</div>
+                @if($booking->space->image_1)
+                    <img src="{{ storage_path('app/public/' . $booking->space->image_1) }}" alt="Front view" style="width: 100px; height: 100px; object-fit: cover;">
+                @else
+                    <div style="width: 100px; height: 100px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">No image</div>
+                @endif
             </div>
-            
-            <!-- Second Row - Whole View centered -->
-            <div class="gallery-single">
-                <div class="gallery-item">
-                    <div class="title">Whole View</div>
-                    @if($booking->space->image_3)
-                        <img src="{{ storage_path('app/public/' . $booking->space->image_3) }}" alt="Whole view">
-                    @else
-                        <div class="no-image">No image</div>
-                    @endif
-                </div>
+        
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="title" style="margin-bottom: 5px;">Back View</div>
+                @if($booking->space->image_2)
+                    <img src="{{ storage_path('app/public/' . $booking->space->image_2) }}" alt="Back view" style="width: 100px; height: 100px; object-fit: cover;">
+                @else
+                    <div style="width: 100px; height: 100px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">No image</div>
+                @endif
+            </div>
+        
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <div class="title" style="margin-bottom: 5px;">Whole View</div>
+                @if($booking->space->image_3)
+                    <img src="{{ storage_path('app/public/' . $booking->space->image_3) }}" alt="Whole view" style="width: 100px; height: 100px; object-fit: cover;">
+                @else
+                    <div style="width: 100px; height: 100px; background-color: #f0f0f0; display: flex; align-items: center; justify-content: center;">No image</div>
+                @endif
             </div>
         </div>
+        
         
     </body>
 </html>
