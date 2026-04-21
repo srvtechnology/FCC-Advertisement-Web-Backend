@@ -30,7 +30,7 @@ class UserController extends Controller
             $query->where('name', 'LIKE', "%{$search}%")
                   ->orWhere('email', 'LIKE', "%{$search}%");
         }
-        $users = $query->with('roles')->orderBy('id', 'desc')->paginate(50);
+        $users = $query->with('roles')->orderBy('id', 'desc')->get();//->paginate(50)
         // Order by latest ID and paginate
         return UserResource::collection($users);
     }
