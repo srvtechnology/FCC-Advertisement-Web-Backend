@@ -43,7 +43,7 @@ class CameraController extends Controller
                 'image' => new \CURLFile($path, $imageFile->getMimeType(), $filename),
             ];
 
-            $apiKey = 'DLAI@7879#17';
+            $apiKey = env('DEEP_LOGIC_API_KEY');
 
 
 
